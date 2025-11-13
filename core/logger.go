@@ -1,3 +1,6 @@
+/*
+Logger is a logger, kinda funny how it goes...
+*/
 package core
 
 import (
