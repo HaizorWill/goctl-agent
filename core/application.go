@@ -7,6 +7,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/coreos/go-systemd/v22/dbus"
 )
@@ -25,9 +26,10 @@ type Application struct {
 	ShouldClose chan os.Signal
 	Connection  *dbus.Conn
 	Context     context.Context
-	Service     Service
-	Handler     Handler
+	Service     *Service
+	Handler     *Handler
 	Server      HttpServer
+	mu          sync.RWMutex
 }
 
 func NewApplication() *Application {
@@ -43,10 +45,11 @@ func NewApplication() *Application {
 	LogInfo("Connected. Initializing services...")
 	App := &Application{Connection: conn, Context: ctx, ShouldClose: make(chan os.Signal, 1)}
 	service := NewService(App)
-	App.Service = *service
+	App.Service = service
+	App.Service.Initialize()
 	handler := NewHandler(service)
-	App.Handler = *handler
-	App.Server = *HttpInit(App.Handler)
+	App.Handler = handler
+	App.Server = *HttpInit(*App.Handler)
 	return App
 }
 
