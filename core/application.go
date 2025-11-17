@@ -12,6 +12,12 @@ import (
 )
 
 type Config struct {
+	Addr string
+	Port string
+}
+
+func NewConfig(a string, p string) *Config {
+	return &Config{Addr: a, Port: p}
 }
 
 type Application struct {
@@ -25,7 +31,7 @@ type Application struct {
 }
 
 func NewApplication() *Application {
-	LogInit()
+	NewLogger()
 	ctx := context.Background()
 	LogInfo("Started. Connecting to dbus...")
 	conn, err := dbus.NewSystemConnectionContext(ctx)
@@ -35,23 +41,23 @@ func NewApplication() *Application {
 		os.Exit(1)
 	}
 	LogInfo("Connected. Initializing services...")
-	App := &Application{Connection: conn, Context: ctx}
+	App := &Application{Connection: conn, Context: ctx, ShouldClose: make(chan os.Signal, 1)}
 	service := NewService(App)
 	App.Service = *service
 	handler := NewHandler(service)
 	App.Handler = *handler
-	App.ShouldClose = make(chan os.Signal, 1)
 	App.Server = *HttpInit(App.Handler)
 	return App
 }
 
 func (a *Application) Run() {
+	a.Server.GET("/services", a.Handler.Services)
 	LogInfo("Application initialized successfully! Running on port 8080...")
 	http.ListenAndServe("0.0.0.0:8080", a.Server.mux)
 }
 
 func (a *Application) Stop() {
-	//closing connection, cleaning, etc.
 	a.Connection.Close()
+	LogInfo("Connection to dbus has been successfully closed, exiting...")
 	os.Exit(0)
 }
