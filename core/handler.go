@@ -6,7 +6,9 @@ package core
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 )
 
 type Handler struct {
@@ -20,7 +22,8 @@ func NewHandler(s *Service) *Handler {
 }
 
 func (h *Handler) Services(w http.ResponseWriter, r *http.Request) {
-	units, err := h.ListAllUnits()
+	start := time.Now()
+	units, err := h.ListUnits()
 	if err != nil {
 		//Logging????
 		fmt.Print(err)
@@ -30,4 +33,5 @@ func (h *Handler) Services(w http.ResponseWriter, r *http.Request) {
 		LogInfo("Failed to... BlahBLAH")
 	}
 	w.Write(jUnits)
+	log.Printf("Request took: %s", time.Since(start))
 }
