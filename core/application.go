@@ -1,7 +1,8 @@
+package core
+
 /*
 Application is a layer responsible for dependency injection and an actual execution loop
 */
-package core
 
 import (
 	"context"
@@ -54,7 +55,8 @@ func NewApplication() *Application {
 }
 
 func (a *Application) Run() {
-	a.Server.GET("/services", a.Handler.Services)
+	a.Server.GET("/services", a.Handler.GetServices)
+	a.Server.POST("/services/enable", a.Handler.EnableUnits)
 	LogInfo("Application initialized successfully! Running on port 8080...")
 	http.ListenAndServe("0.0.0.0:8080", a.Server.mux)
 }

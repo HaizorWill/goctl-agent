@@ -1,8 +1,9 @@
+package core
+
 /*
 Service is a layer which is responsible for scraping data,
 using dbus, provided by Application class
 */
-package core
 
 import (
 	"fmt"
@@ -69,6 +70,14 @@ func (s *Service) ListUnits() (units []dbus.UnitStatus, err error) {
 
 	return
 }
+
+func (s *Service) EnableUnitFile(files []string) {
+	s.Connection.EnableUnitFilesContext(s.Context, files, false, false)
+}
+
+// func (s *Service) StartUnit() {
+// 	s.Connection.StartUnitContext()
+// }
 
 func (s *Service) ListAllUnits() (units []dbus.UnitStatus, err error) {
 	units, err = s.Connection.ListUnitsContext(s.Context)
