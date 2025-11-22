@@ -26,7 +26,7 @@ func (h *Handler) GetServices(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	units, err := h.ListUnits()
 	if err != nil {
-		//Logging????
+		// Logging????
 		fmt.Print(err)
 	}
 	// Using identation for testing purposes, since it is hard to read json, containing services
@@ -50,6 +50,7 @@ func (h *Handler) EnableUnits(w http.ResponseWriter, r *http.Request) {
 	for _, svc := range units.Services {
 		fmt.Print(svc)
 	}
+	h.Service.EnableUnitFile(units.Services)
 
 	log.Printf("Request took: %s", time.Since(start))
 }

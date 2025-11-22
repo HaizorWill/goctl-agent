@@ -8,7 +8,6 @@ using dbus, provided by Application class
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -46,7 +45,8 @@ func (s *Service) Initialize() {
 }
 
 func (s *Service) ListUnits() (units []dbus.UnitStatus, err error) {
-	loadedUnits, err := s.Connection.ListUnitsContext(s.Context)
+	// loadedUnits, err := s.Connection.ListUnitsContext(s.Context)
+	loadedUnits, err := s.Connection.ListUnitsFilteredContext(s.Context, []string{})
 	if err != nil {
 		return
 	}
@@ -54,17 +54,17 @@ func (s *Service) ListUnits() (units []dbus.UnitStatus, err error) {
 	for _, unit := range loadedUnits {
 		unitMap[unit.Name] = unit
 	}
-	for _, unitFile := range s.unitFiles {
-		unitName := filepath.Base(unitFile.Path)
-		if _, exists := unitMap[unitName]; !exists {
-			unitMap[unitName] = dbus.UnitStatus{
-				Name:        unitName,
-				LoadState:   "unloaded",
-				ActiveState: "inactive",
-				SubState:    "dead",
-			}
-		}
-	}
+	// for _, unitFile := range s.unitFiles {
+	// 	unitName := filepath.Base(unitFile.Path)
+	// 	if _, exists := unitMap[unitName]; !exists {
+	// 		unitMap[unitName] = dbus.UnitStatus{
+	// 			Name:        unitName,
+	// 			LoadState:   "unloaded",
+	// 			ActiveState: "inactive",
+	// 			SubState:    "dead",
+	// 		}
+	// 	}
+	// }
 
 	for _, unit := range unitMap {
 		if strings.HasSuffix(unit.Name, ".service") {
@@ -76,7 +76,11 @@ func (s *Service) ListUnits() (units []dbus.UnitStatus, err error) {
 }
 
 func (s *Service) EnableUnitFile(files []string) {
-	s.Connection.EnableUnitFilesContext(s.Context, files, false, false)
+	status, unit, err := s.Connection.EnableUnitFilesContext(s.Context, files, false, false)
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Print(status, unit)
 }
 
 // func (s *Service) StartUnit() {
