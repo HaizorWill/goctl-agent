@@ -45,7 +45,7 @@ func NewApplication() *Application {
 	}
 	LogInfo("Connected. Initializing services...")
 	App := &Application{Connection: conn, Context: ctx, ShouldClose: make(chan os.Signal, 1)}
-	service := NewService(App)
+	service := NewService(App.Connection, App.Context, &App.mu)
 	App.Service = service
 	App.Service.Initialize()
 	handler := NewHandler(service)

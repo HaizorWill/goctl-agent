@@ -6,23 +6,27 @@ using dbus, provided by Application class
 */
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	dbus "github.com/coreos/go-systemd/v22/dbus"
 )
 
 type Service struct {
-	*Application
-	ch        chan string
-	unitFiles []dbus.UnitFile
+	Connection *dbus.Conn
+	Context    context.Context
+	mu         *sync.RWMutex
+	ch         chan string
+	unitFiles  []dbus.UnitFile
 }
 
-func NewService(a *Application) *Service {
+func NewService(conn *dbus.Conn, ctx context.Context, mu *sync.RWMutex) *Service {
 	ch := make(chan string)
-	return &Service{Application: a, ch: ch}
+	return &Service{Connection: conn, Context: ctx, mu: mu, ch: ch}
 }
 
 // Burn this whole fucking code alive and never ever touch it again
