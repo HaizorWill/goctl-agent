@@ -1,5 +1,7 @@
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <systemd/sd-bus-protocol.h>
 #include <systemd/sd-bus.h>
 #include <unistd.h>
@@ -21,6 +23,11 @@ struct systemd_bus *new_systemd_bus(void) {
   return dbus;
 }
 
+void systemd_bus_conn_close(struct systemd_bus *dbus) {
+  sd_bus_close_unref(dbus->bus);
+  free(dbus);
+}
+
 void systemd_bus_set_dest(struct systemd_bus *dbus) {
   dbus->dest = "org.freedesktop.systemd1";
   dbus->path = "/org/freedesktop/systemd1";
@@ -35,10 +42,9 @@ int systemd_bus_call(struct systemd_bus *dbus, const char *member,
                      const char *types, ...) {
   va_list args;
   va_start(args, types);
-  int err = sd_bus_call_method(dbus->bus, dbus->dest, dbus->path, dbus->iface,
-                               member, dbus->err, &dbus->mes, types, args);
+  int err = sd_bus_call_methodv(dbus->bus, dbus->dest, dbus->path, dbus->iface,
+                                member, dbus->err, &dbus->mes, types, args);
   va_end(args);
-
   if (err < 0)
     return 1;
   return 0;
