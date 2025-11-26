@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "dbus.h"
+#include "server.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <systemd/sd-bus.h>
@@ -15,6 +16,14 @@ int main() {
   systemd_bus_call(bus, "GetUnitByPID", "u", pid);
   char *ans = systemd_bus_message_read(bus, "o");
   printf("Here: %s", ans);
-  systemd_bus_conn_close(bus);
+  systemd_bus_conn_close_unref(bus);
+  struct tcp_server *server = new_tcp_server();
+  // while (true) {
+  int err = tcp_server_serve(server);
+  if (err < 0) {
+    tcp_server_close_unref(server);
+    // break;
+  }
+  // }
   return 0;
 }
