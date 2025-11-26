@@ -15,15 +15,16 @@ int main() {
   unsigned pid = 1;
   systemd_bus_call(bus, "GetUnitByPID", "u", pid);
   char *ans = systemd_bus_message_read(bus, "o");
-  printf("Here: %s", ans);
+  printf("Here: %s\n", ans);
   systemd_bus_conn_close_unref(bus);
   struct tcp_server *server = new_tcp_server();
-  // while (true) {
-  int err = tcp_server_serve(server);
-  if (err < 0) {
-    tcp_server_close_unref(server);
-    // break;
+  while (true) {
+    int err = tcp_server_serve(server);
+    if (err < 0) {
+      tcp_server_close_unref(server);
+      break;
+    }
   }
-  // }
+  tcp_server_close_unref(server);
   return 0;
 }

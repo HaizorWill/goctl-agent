@@ -13,12 +13,27 @@ struct tcp_server {
   socklen_t client_len;
 };
 
+void read_and_reply(int connection_fd) {
+  char rbuf[64] = {};
+  ssize_t n = read(connection_fd, rbuf, sizeof(rbuf) - 1);
+  if (n < 0) {
+    printf("%s\n", strerror(errno));
+    return;
+  }
+  printf("Simon says: %s", rbuf);
+
+  char wbuf[] = "What does simon say";
+  write(connection_fd, wbuf, strlen(wbuf));
+}
+
 int tcp_server_serve(struct tcp_server *server) {
   int connection_fd =
       accept(server->socket_fd, (struct sockaddr *)&server->client_addr,
              &server->client_len);
   if (connection_fd < 0)
     return -1;
+
+  read_and_reply(connection_fd);
   close(connection_fd);
   return 0;
 }
@@ -65,5 +80,5 @@ struct tcp_server *new_tcp_server(void) {
 
   listen(server->socket_fd, 10);
 
-  return 0;
+  return server;
 }
