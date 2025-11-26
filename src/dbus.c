@@ -1,7 +1,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <systemd/sd-bus-protocol.h>
 #include <systemd/sd-bus.h>
 #include <unistd.h>
@@ -18,12 +17,14 @@ struct systemd_bus {
 struct systemd_bus *new_systemd_bus(void) {
   struct systemd_bus *dbus = calloc(1, sizeof(struct systemd_bus));
   int err = sd_bus_open_system(&dbus->bus);
-  if (err < 0)
-    return NULL;
+  if (err < 0) {
+    printf("Could not connect to dbus... Returned: %i", err);
+    exit(1);
+  }
   return dbus;
 }
 
-void systemd_bus_conn_close(struct systemd_bus *dbus) {
+void systemd_bus_conn_close_unref(struct systemd_bus *dbus) {
   sd_bus_close_unref(dbus->bus);
   free(dbus);
 }
@@ -46,7 +47,7 @@ int systemd_bus_call(struct systemd_bus *dbus, const char *member,
                                 member, dbus->err, &dbus->mes, types, args);
   va_end(args);
   if (err < 0)
-    return 1;
+    return -1;
   return 0;
 }
 
