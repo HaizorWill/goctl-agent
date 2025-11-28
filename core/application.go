@@ -37,7 +37,7 @@ func NewApplication() *Application {
 	NewLogger()
 	ctx := context.Background()
 	LogInfo("Started. Connecting to dbus...")
-	conn, err := dbus.NewSystemConnectionContext(ctx)
+	conn, err := dbus.NewSystemdConnectionContext(ctx)
 	if err != nil {
 		LogError("Failed to connect to dbus!")
 		LogError("Try starting the application in privileged mode...", "err", err)
